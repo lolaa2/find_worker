@@ -1,0 +1,148 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Resources\ServicesResource;
+use Illuminate\Http\Request;
+
+use App\Models\Service;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+
+class ServicesController extends Controller
+{
+    public function services(Request $request){
+       $services = Service :: with(['user','city','category','images'])
+            ->when($request->city_id,function($query) use($request) {
+                $query->where('city_id',$request->city_id);
+            
+            })
+            ->when($request->min_price,function($query) use($request) {
+              $query->where('price',">=",$request->min_price);
+          
+          })
+              ->latest()
+              ->paginate(5);
+
+       $services_res = ServicesResource::collection($services);
+      return response()->json([
+        'data' => $services_res
+      ]);
+
+    }
+    public function getUserServices(Request $service ){
+     
+        $user =Auth::id();
+        $services = Service::where('user_id',$user)->with(['user','city','category','images'])->get();
+          $services_res = ServicesResource::collection($services);
+        return response()->json([ 'data' => $services_res]);
+  
+  }
+  public function deleteService(Request $request, $serviceId)
+{
+ 
+    $user = Auth::id();
+
+    // التحقق مما إذا كان المستخدم يمتلك الخدمة قبل حذفها
+    $service = Service::where('id', $serviceId)
+                      ->where('user_id', $user)
+                      ->first();    
+
+                       if (!$service) {
+                          return response()->json([
+                              'status' => false,
+                              'message' => 'Service not found ',
+                          ], 404);
+                        }     
+
+
+
+                      //الخدمة موجودة 
+
+                      $service->delete();
+
+
+                        return response()->json([
+                        'status' => true,
+                        'message' => 'Service deleted successfully.',
+                    ]);
+
+   
+
+  
+}
+
+
+
+
+
+
+    public function store(Request $request)
+    {
+
+      $validator = Validator::make($request->all(),[
+          'name' => ['required','string','min:3','max:200'],
+          'description' => ['required','string','min:3','max:1000'],
+          'category_id' => ['required','numeric','exists:categories,id'],
+          'city_id' => ['required','numeric','exists:cities,id'],
+          'price' => ['required','numeric','min:0'],
+          'images'=>['nullable','array','max:5'],
+          'images.*'=>['image','max:10240']
+      ]);
+
+      if($validator->fails()){
+        return response()->json([
+          'status' => false,
+          'message' => 'Validaion error',
+          'errors' => $validator->errors()
+      ],422);
+      }
+
+
+      if(is_array($request->images)){
+
+        $images = $request->images;
+
+        $paths=[];
+        foreach($images as $image){
+
+           // $name = $image->getClientOriginalName();
+
+           $name = uniqid('img_').'.'.$image->getClientOriginalExtension();
+
+            $path = "/images";
+
+            $image->storeAs("/public".$path,$name);
+            
+            $paths[]="storage".$path."/".$name;
+
+
+        }
+      }
+
+    
+      $service =Service::create ([
+      "name"=>$request->name,
+      "description"=>$request->description,
+      "category_id"=>$request->category_id,
+      "city_id"=>$request->city_id,
+      "price"=>$request->price,
+      "user_id" =>Auth::id()
+      ]);
+
+      foreach($paths as $image_path){
+        $service->images()->create([
+            'path' => $image_path
+        ]);
+       
+      }
+
+      return response()->json([
+        'status' => true,
+        'message' => 'Service created successfully',
+        'data' => $service ]);
+    
+
+
+    }
+} 
