@@ -15,8 +15,12 @@ class PreviousResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+             'id'=>$this->id,
             'describtion'=>$this->description,
             'title'=>$this->title,
+            'images' => ImagesResource::collection($this->images)
+
+            
         ];
     }
 }

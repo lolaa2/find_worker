@@ -27,8 +27,9 @@ Route ::get('/',[ProfileController::class, 'getUserProfile'])->middleware('auth:
 });
 
 Route::prefix('/previous')->group((function(){
-    Route::post('/',[PreviousController::class,'addPrevious']);
-    Route::get('/previous_works',[PreviousController::class,'getUserPrevious'])->middleware('auth:sanctum');
+    Route::post('/',[PreviousController::class,'addPrevious'])->middleware('auth:sanctum');
+    Route::get('/{id?}',[PreviousController::class,'getUserPrevious'])->middleware('auth:sanctum');
+    Route::post('/{previousId}',[PreviousController::class,'updatePrevious'])->middleware('auth:sanctum');
 }));
 
 Route::post('/register',[RegisterController::class,'register']);

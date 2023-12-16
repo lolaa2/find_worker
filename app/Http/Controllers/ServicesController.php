@@ -55,7 +55,7 @@ class ServicesController extends Controller
                           ], 404);
                         }     
 
-
+                      $service->images()->delete();
 
                       //الخدمة موجودة 
 

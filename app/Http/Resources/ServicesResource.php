@@ -22,6 +22,7 @@ class ServicesResource extends JsonResource
             'categoryName'=>$this->category->name,
             'price'=>$this->price." SP",
             'userName'=>$this->user->name,
+            'userId'=>$this->user->id,
             'publishDate'=>$this->created_at->diffForHumans(),
             'images' => ImagesResource::collection($this->images)
             
