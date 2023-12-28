@@ -51,6 +51,33 @@ class PreviousController extends Controller
      }
 
     public  function deletePrevious(Request $previous, $previousId){
+       
+    $user = Auth::id();
+
+    $previous = Previous::where('id', $previousId)
+                      ->where('user_id', $user)
+                      ->first();    
+
+                       if (!$previous) {
+                          return response()->json([
+                              'status' => false,
+                              'message' => 'this previous not found ',
+                          ], 404);
+                        }     
+
+                      $previous->images()->delete();
+
+                      $previous->delete();
+
+
+                        return response()->json([
+                        'status' => true,
+                        'message' => 'previous deleted successfully.',
+                    ]);
+
+   
+
+  
       
     }
 

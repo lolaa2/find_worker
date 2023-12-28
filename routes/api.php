@@ -30,6 +30,8 @@ Route::prefix('/previous')->group((function(){
     Route::post('/',[PreviousController::class,'addPrevious'])->middleware('auth:sanctum');
     Route::get('/{id?}',[PreviousController::class,'getUserPrevious'])->middleware('auth:sanctum');
     Route::post('/{previousId}',[PreviousController::class,'updatePrevious'])->middleware('auth:sanctum');
+    Route::delete('/{previousId}',[PreviousController::class,'deleteService'])->middleware('auth:sanctum');
+
 }));
 
 Route::post('/register',[RegisterController::class,'register']);
@@ -45,6 +47,7 @@ Route::prefix('/services')
     Route::get('/',[ ServicesController::class,'services']);
     Route::post('/store',[ServicesController::class,'store'])->middleware('auth:sanctum');
     Route::delete('/delete/{serviceId}',[ServicesController::class,'deleteService'])->middleware('auth:sanctum');
+    Route::post('/update/{service_id}', [ServicesController::class, 'updateService'])->middleware('auth:sanctum');
 
 
 }); 
