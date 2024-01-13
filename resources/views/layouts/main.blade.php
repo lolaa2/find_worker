@@ -267,19 +267,7 @@
 
     <div class="container-fluid py-4">
 
-      @if($message = Session::get('warning'))
-      <div class="alert alert-warning2">
-        <strong>Warning!</strong> {{$message}}.
-      </div>
       
-      @endif
-
-      @if($message = Session::get('success'))
-      <div class="alert alert-success">
-        <strong>Success!</strong> {{$message}}.
-      </div>
-      
-      @endif
 
       @yield('content')
       <footer class="footer py-4  ">
@@ -411,7 +399,64 @@
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="{{URL::asset('/assets/js/material-dashboard.min.js?v=3.1.0')}}"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script>
+      function showDeleteAlert(event,message)
+      {
+        event.preventDefault();
+      
+        form = event.target;
+        console.log(event.target)
+        
 
+        swal({
+          title: "Are you sure?",
+          text: message,
+          icon: "warning",
+          buttons: true,
+          dangerMode: true,
+        })
+        .then((willDelete) => {
+          if (willDelete) {
+            form.submit()
+          } else {
+            return false;
+          }
+        });
+        
+      }
+
+      @if($message = Session::get('warning'))
+        $(document).ready(function (){
+          swal("Warning ", "{{$message}}", "warning");
+        })
+      @endif
+
+      @if($message = Session::get('success'))
+      $(document).ready(function (){
+        swal({
+          title: "Success",
+          text: "{{$message}}",
+          icon: "success",
+          buttons: true,
+          toast:true
+        });
+        })
+      
+      @endif
+       
+
+      @if($message = Session::get('error'))
+      
+      $(document).ready(function (){
+          swal("Error ", "{{$message}}", "error");
+        })
+      
+      @endif
+
+
+    </script>
 </body>
 
 </html>

@@ -3,13 +3,7 @@
 @section("content")
 <div class="container">
     <div class="card">
-        <div class="card-header">
-            <div class="d-flex justify-content-between">
-                <h4>Manage Cities</h4>
-                <a href="{{route('dashboard.cities.create')}}" class="btn btn-primary">Add</a>
-            </div>
-
-        </div>
+        <div class="card-header">Manage Categoreis</div>
         <div class="card-body">
             {{ $dataTable->table() }}
         </div>

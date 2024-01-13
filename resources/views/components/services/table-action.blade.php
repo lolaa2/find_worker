@@ -6,7 +6,7 @@
     <a href="{{route('dashboard.services.edit',$id)}}" class="btn btn-warning mx-1" >
         edit
     </a>
-    <form action="{{route('dashboard.services.delete',$id)}}" method="POST">
+    <form action="{{route('dashboard.workers.delete',$id)}}" method="POST" onsubmit="showDeleteAlert(event,'All services will be deleted ')">
         @method('delete')
         @csrf
     <button class="btn btn-danger mx-1" >

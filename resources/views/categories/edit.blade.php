@@ -14,16 +14,16 @@
 
 
 <div class="card">
-    <h5 class="card-header">Edit City</h5>
+    <h5 class="card-header">Edit Categoreis</h5>
     <div class="card-body">
         
-<form action="{{route('dashboard.cities.update',$city->id)}}"method="POST">
+<form action="{{route('dashboard.categoreis.update',$cate->id)}}"method="POST">
     @csrf
 
     @method('PUT')
     <div class="form-group">
       <label for="email">Name:</label>
-      <input type="text" name="name" class="form-control" id="name" value="{{$city->name}}">
+      <input type="text" name="name" class="form-control" id="name" value="{{$cate->name}}">
       @error('name')
       <small class="text-danger">
           {{$message}}
