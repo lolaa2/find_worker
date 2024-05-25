@@ -3,7 +3,11 @@
 @section("content")
 <div class="container">
     <div class="card">
-        <div class="card-header">Manage Categoreis</div>
+        <div class="card-header">
+            
+        <h4>Manage Categoreis</h4>
+        <a href="{{route('dashboard.categoreis.create')}}" class="btn btn-primary">Add</a>
+         </div>
         <div class="card-body">
             {{ $dataTable->table() }}
         </div>

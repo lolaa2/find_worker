@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('phone')->unique();
             $table->foreignId('city_id');
             $table->foreign('city_id')->references("id") ->on("cities");     
-              $table->rememberToken();
+            $table->rememberToken();
             $table->timestamps();
 
 

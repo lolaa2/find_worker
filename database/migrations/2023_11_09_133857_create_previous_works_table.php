@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('previous_works', function (Blueprint $table) {
             $table->id();
+        
             $table->string('title');
             $table->text('description');
             $table->foreignId('user_id');
-            $table->timestamps();
-
             $table->foreign('user_id')->references('id')->on('users');
+
+            $table->timestamps();
         });
     }
 

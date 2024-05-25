@@ -31,7 +31,8 @@ class PreviousController extends Controller
           $work =Previous::create ([
             "title"=>$request->title,
             "description"=>$request->description,
-            "user_id" =>Auth::id()
+            "user_id" =>Auth::id(),
+            "user_name"=>Auth::name()
           
             ]);
             if(is_array($request->images)){

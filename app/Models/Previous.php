@@ -11,7 +11,7 @@ class Previous extends Model
     protected $fillable = [
         'title',
         'description',
-        'user_id'
+        'user_id',
     ];
     public function images() {
         return $this->morphMany(Image::class, 'imageable');

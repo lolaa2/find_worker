@@ -18,7 +18,7 @@
     @method('PUT')
     <div class="form-group">
       <label for="email">Title:</label>
-      <input type="text" name="title" class="form-control" id="title" value="{{$previous->name}}">
+      <input type="text" name="title" class="form-control" id="title" value="{{$previous->title}}">
       @error('name')
       <small class="text-danger">
           {{$message}}

@@ -15,12 +15,13 @@ class PreviousResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-             'id'=>$this->id,
-            'describtion'=>$this->description,
-            'title'=>$this->title,
+            'id' => $this->id,
+            'user_name' => $this->users->name,
+            'describtion' => $this->description,
+            'title' => $this->title,
             'images' => ImagesResource::collection($this->images)
 
-            
+
         ];
     }
 }

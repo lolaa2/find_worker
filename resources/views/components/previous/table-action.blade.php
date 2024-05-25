@@ -6,11 +6,12 @@
     <a href="{{route('dashboard.previous.edit',$id)}}" class="btn btn-warning mx-1" >
         edit
     </a>
-    <form method="POST" action="{{route('dashboard.workers.delete',$id)}}" method="POST" onsubmit="showDeleteAlert(event,'All previous Work will be deleted ')">
-         @method('delete')
-        @csrf 
-
-    <button  class="btn btn-danger mx-1" >
+    <form action="{{route('dashboard.previous.delete',$id)}}
+    " method="POST"
+     onsubmit="showDeleteAlert(event,This Previous will be deleted )">
+        @method('delete')
+        @csrf
+    <button class="btn btn-danger mx-1" >
         delete
     </button>
     </form>

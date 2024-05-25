@@ -3,7 +3,9 @@
 @section("content")
 <div class="container">
     <div class="card">
-        <div class="card-header">Manage Works Type</div>
+        <div class="card-header"><h4>Manage Works Type</h4>
+            <a href="{{route('dashboard.workstype.create')}}" class="btn btn-primary">Add</a>
+        </div>
         <div class="card-body">
             {{ $dataTable->table() }}
         </div>

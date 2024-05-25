@@ -1,8 +1,11 @@
 <?php
 
 namespace App\DataTables;
+
 use App\Models\Previous;
+
 use App\Models\PreviousWork;
+use COM;
 use Illuminate\Support\Facades\View;
 
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
@@ -24,11 +27,11 @@ class PreviousWorksDataTable extends DataTable
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
         return (new EloquentDataTable($query))
-        ->addColumn('action', function($previous){
-            return View::make('components.previous.table-action',[
-                'id'=>$previous->id
-            ]);
-        })
+            ->addColumn('action', function ($previous) {
+                return View::make('components.previous.table-action', [
+                    'id' => $previous->id,
+                ]);
+            })
             ->rawColumns(['action'])
             ->setRowId('id');
     }
@@ -47,16 +50,16 @@ class PreviousWorksDataTable extends DataTable
     public function html(): HtmlBuilder
     {
         return $this->builder()
-                    ->setTableId('previousworks-table')
-                    ->columns($this->getColumns())
-                    ->minifiedAjax()
-                    //->dom('Bfrtip')
-                    ->orderBy(1)
-                    ->selectStyleSingle()
-                    ->buttons([
-                
-                        Button::make('reload')
-                    ]);
+            ->setTableId('previousworks-table')
+            ->columns($this->getColumns())
+            ->minifiedAjax()
+            //->dom('Bfrtip')
+            ->orderBy(1)
+            ->selectStyleSingle()
+            ->buttons([
+
+                Button::make('reload')
+            ]);
     }
 
     /**
@@ -65,16 +68,16 @@ class PreviousWorksDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-        
+
             Column::make('id'),
             Column::make('title'),
             Column::make('created_at'),
             Column::make('updated_at'),
             Column::computed('action')
-            ->exportable(false)
-            ->printable(false)
-            ->width(60)
-            ->addClass('text-center'),
+                ->exportable(false)
+                ->printable(false)
+                ->width(60)
+                ->addClass('text-center'),
         ];
     }
 

@@ -8,15 +8,46 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\City;
 use App\Models\Work;
+use App\Models\Worker;
+use App\Models\Service;
 
 class WorkersController extends Controller
 {
     public function index(WorkersDataTable $workersDataTable){
         return $workersDataTable->render('workers.index');
     }
-    public function create(){
-        return view("workers.create");
+    public function create(Service $service){
+        return view("workers.create",[
+           'service'=> $service,
+            'cities'=>City::all(),
+            'works'=>Work::all()
+        ]);
     }
+
+
+    public function addWorker(Request $request){
+
+        $request->validate([
+            'name' => ['required','string'],
+            'email' => ['required','string'],
+            'phone' => ['required','numeric'],
+            'city_id' => ['required','exists:cities,id'],
+            'work_id' => ['required','exists:cities,id'],
+            'password'=>['required','string']
+        ]);
+        $worker=User::create([
+            'name'=>$request->name,
+            'email'=>$request->email,
+            'phone' => $request->phone,
+            'city_id' => $request->city_id,
+            'work_id' => $request->work_id,
+            'password'=>$request->password
+        ]);
+        return back()->with('success','New Worker Added Succsessfully');
+     
+     
+      }
+
     public function update(User $worker,Request $request){
 
         $request->validate([
@@ -48,8 +79,11 @@ class WorkersController extends Controller
         ]);
     }
 
-    public function show(){
-        return view("workers.show");
+    public function show(Worker $worker){
+        return view("workers.show",[
+            'worker'=>$worker
+        ]);
+
     }
     public function delete(User $worker){
 

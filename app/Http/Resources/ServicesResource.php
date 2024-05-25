@@ -20,7 +20,7 @@ class ServicesResource extends JsonResource
             'description'=>$this->description,
             'cityName'=>$this->city->name,
             'categoryName'=>$this->category->name,
-            'price'=>$this->price." SP",
+            'price'=>$this->price.'sp',
             'userName'=>$this->user->name,
             'userId'=>$this->user->id,
             'publishDate'=>$this->created_at->diffForHumans(),

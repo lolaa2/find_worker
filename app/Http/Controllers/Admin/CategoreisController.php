@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 class CategoreisController extends Controller
 {
     public function index(CategoreisDataTable $categoreisDataTable){
-        return $categoreisDataTable->render('cities.index');
+        return $categoreisDataTable->render('categories.index');
     }
     
 
@@ -27,12 +27,12 @@ class CategoreisController extends Controller
             'name'=>$request->name,
         ]);
      
-        return back()->with('success','City Updated Successfully');
+        return back()->with('success','category Updated Successfully');
      
      }
      public function edit(Category $cate){
         
-        return view('cities.edit',[
+        return view('categories.edit',[
             'cate'=>$cate,
           
             
@@ -52,6 +52,26 @@ public function delete(Category $cate){
     }
 
 
-}}
+}
+public function add( ){
+    return view ("categories.add");
+  }
+
+  public function addcat(Request $request){
+    $request->validate([
+        'name'=>['required','string']        
+    ]);
+    $cate=Category::create([
+        'name'=>$request->name
+    ]);
+    return back()->with('success','New Categorei Added Succsessfully');
+
+}
+
+
+
+
+
+}
 
 

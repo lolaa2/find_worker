@@ -3,14 +3,20 @@
 @section("content")
 <div class="container">
     <div class="card">
-        <div class="card-header">Manage Services</div>
+        <div class="card-header">
+        <h4>Manage Services</h4>
+        <a href="{{route('dashboard.services.create')}}" class="btn btn-primary">Add</a>
+  
+
+    </div>
         <div class="card-body">
             {{ $dataTable->table() }}
         </div>
+
     </div>
 </div>
 @endsection
-@push('scripts')
+ @push('scripts')
     {{ $dataTable->scripts(attributes: ['type' => 'module']) }}
 @endpush
 @push('css')
@@ -26,4 +32,4 @@
         .h2{color: rgb(231, 228, 9)}
         
     </style>
-@endpush
+@endpush 

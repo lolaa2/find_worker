@@ -9,10 +9,14 @@
     <div class="card-body">
       <blockquote class="blockquote mb-0 p-2">
         <p>
-            <h6>Description</h6>
+
+          <h2>Title</h2>
             
-            {{$previous->description}}.</p>
-            <h6>Images</h6>
+          {{$previous->title}}.</p><br>
+            <h2>Description</h2>
+            
+            {{$previous->description}}.</p><br>
+            <h2>Images</h2>
         @foreach ($previous->images as $image)
             <img style="width: 150px;height:150px;" src="{{URL::asset($image->path)}}"/>
         @endforeach

@@ -16,6 +16,23 @@ class PrevioussController extends Controller
 public function create(){
     return view('previous.create');
 }
+
+public function addPrevious( Previous $previous,Request $request){
+  $request->validate([
+      'description'=>['required','string'],
+      'title'=>['required','string']         
+  ]);
+  $previous=Previous::create([
+      'description'=>$request->description,
+      'title'=>$request->title,
+     
+  ]
+); 
+
+  return back()->with('success','New Previous work Added Succsessfully');
+
+}
+
 public function update(Previous $previous,Request $request){
 
   $request->validate([
@@ -38,13 +55,16 @@ public function edit(Previous $previous){
 
   return view('previous.edit',[
       'previous'=>$previous,
-    
+      'title'=>$previous->title
       
   ]);
 }
 
-public function show(){
-    return view('previous.show');
+public function show(Previous $previous){
+    return view('previous.show',[
+      'previous'=>$previous
+    ]);
+    
 }
 public function delete(Previous $previous){
   if(User::where('id',$previous->id)->exists()){
@@ -52,7 +72,7 @@ public function delete(Previous $previous){
   }else{
   $previous->images()->delete();
   $previous->delete();
-  return back();
+  return back()->with('success','Previous deleted successfuly');
   }
 }
 

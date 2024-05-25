@@ -3,7 +3,10 @@
 @section("content")
 <div class="container">
     <div class="card">
-        <div class="card-header">Manage Previous Work</div>
+        <div class="card-header">
+        <h4>Manage Previous Work</h4>
+       
+        </div>
         <div class="card-body">
             {{ $dataTable->table() }}
         </div>

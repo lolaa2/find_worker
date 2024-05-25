@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Company;
+use App\Models\Customer;
+
 return [
 
     /*
@@ -40,6 +43,31 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'admin'=>[
+            'driver' => 'session',
+            'provider' => 'admins',
+        ],
+        'worker_api' => [
+            'driver' => 'sanctum',
+            'provider' => 'users'
+        ],
+        'customer' => [
+            'driver' => 'session',
+            'provider' => 'customers'
+        ],
+        'customer_api' => [
+            'driver' => 'sanctum',
+            'provider' => 'customers'
+        ],
+        'company' => [
+            'driver' => 'session',
+            'provider' => 'companies'
+        ],
+        'company_api' => [
+            'driver' => 'sanctum',
+            'provider' => 'companies'
+        ],
+        
     ],
 
     /*
@@ -63,7 +91,18 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
+        ],'admins'=>[
+            'driver'=>'eloquent',
+            'model'=>App\Models\Admin::class,
         ],
+        'customers' => [
+            'driver' => 'eloquent',
+            'model' => Customer::class
+        ],
+        'companies'=>[
+            'driver' => 'eloquent',
+            'model' => Company::class
+        ]
 
         // 'users' => [
         //     'driver' => 'database',

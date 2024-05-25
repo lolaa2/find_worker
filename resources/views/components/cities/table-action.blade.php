@@ -11,11 +11,11 @@
         delete
     </button>
     </form>
-    <form method="GET" action="{{route('dashboard.cities.create')}}" >
+    {{-- <form method="GET" action="{{route('dashboard.cities.create')}}" >
         @csrf
         
     <button  class="btn btn-success mx-1" >
         Add
     </button>
-    </form>
+    </form> --}}
 </div>

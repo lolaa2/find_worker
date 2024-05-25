@@ -18,7 +18,6 @@ class Service extends Model
         
     ];
 
-
     public function user(){
         return $this->belongsTo(User::class);
     }
@@ -31,5 +30,9 @@ class Service extends Model
     public function images()
     {
         return $this->morphMany(Image::class,'imageable');
+    }
+
+    public function requests(){
+        return $this->hasMany(ServiceRequest::class);
     }
 }

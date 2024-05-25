@@ -15,6 +15,19 @@ class Works_TypeController extends Controller
  public function create(){
     return view('workstype.create');
  }
+
+
+ public function addWorkType(Request $request){
+   $request->validate([
+       'name'=>['required','string']        
+   ]);
+   $workt=Work::create([
+       'name'=>$request->name
+   ]);
+   return back()->with('success','New Type Added Succsessfully');
+
+ }
+
  public function update(Work $workt,Request $request){
 
    $request->validate([
@@ -36,16 +49,14 @@ public function edit(Work $workt){
        
    ]);
 }
- public function show(){
-    return view('workstype.show');
- }
+
  public function delete (Work $workt){
    if(User::where('work_id',$workt->id)->exists()){
       return back()->with('warning','There are useres related to this type');
    }else{
          
       $workt->delete();
-      return back();
+      return back()->with('success','New Type Added Succsessfully');
    }
  }
 }

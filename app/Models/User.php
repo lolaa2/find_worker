@@ -17,6 +17,7 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+    protected $table='users';
     protected $fillable = [
         'name',
         'email',
@@ -53,5 +54,8 @@ class User extends Authenticatable
     public function previous()
     {
         return $this->hasMany(Previous::class);
+    }
+    public function workerRequest(){
+        return $this->belongsTo(workerRequest::class);
     }
 }
