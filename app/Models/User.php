@@ -55,7 +55,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Previous::class);
     }
-    public function workerRequest(){
-        return $this->belongsTo(workerRequest::class);
+    // public function workerRequest(){
+    //     return $this->belongsTo(workerRequest::class);
+    // }
+    public function workerRequest()
+    {
+        return $this->hasMany(WorkerRequest::class);
     }
 }

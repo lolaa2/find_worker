@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('services_requests', function (Blueprint $table) {
             $table->id();
-            $table->enum('status',['pending','accepted','rejected','completed'])->default('pending');
+            $table->enum('status',['pending','accepted','rejected','completed','canceled'])->default('pending');
             $table->foreignId('service_id');
             $table->foreign('service_id')->references('id')->on("services");
             $table->string('note');

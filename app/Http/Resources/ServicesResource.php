@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\ServiceRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,7 +21,8 @@ class ServicesResource extends JsonResource
             'description'=>$this->description,
             'cityName'=>$this->city->name,
             'categoryName'=>$this->category->name,
-            'price'=>$this->price.'sp',
+            'rate'=>(float) $this->requests_avg_rate,
+            'price'=>$this->price,
             'userName'=>$this->user->name,
             'userId'=>$this->user->id,
             'publishDate'=>$this->created_at->diffForHumans(),

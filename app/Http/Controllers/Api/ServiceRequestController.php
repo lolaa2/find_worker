@@ -8,6 +8,7 @@ use App\Models\ServiceRequest;
 use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class ServiceRequestController extends Controller
@@ -63,44 +64,59 @@ class ServiceRequestController extends Controller
         ]);
     }
 
+public function storeRequest(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'note' => ['required', 'string'],
+        'service_id' => ['required', 'integer'],
+        'start_time' => ['required', 'date_format:Y-m-d H:i:s'],
+        'end_time' => ['required', 'date_format:Y-m-d H:i:s'],
+    ]);
 
-
-
-
-    public function storeRequest(Request $request)
-    {
-
-        $validator = Validator::make($request->all(), [
-            'note' => ['required', 'string'],
-            'service_id' => ['required', 'integer'],
-            'start_time' => ['required', 'date_format:Y-m-d H:i:s'],
-            'end_time' => ['required', 'date_format:Y-m-d H:i:s'],
-
-        ]);
-
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Validaion error',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $serivceRequest = ServiceRequest::create([
-            'service_id' => $request->service_id,
-            'customer_id' => Auth::guard('customer_api')->id(),
-            'note' => $request->note,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time
-        ]);
-
+    if ($validator->fails()) {
         return response()->json([
-            'status' => true,
-            'message' => 'Request added successfully',
-            'data' => $serivceRequest
-        ]);
+            'status' => false,
+            'message' => 'Validaion error',
+            'errors' => $validator->errors()
+        ], 422);
     }
+
+    $requests = ServiceRequest::where('service_id', $request->service_id)
+        ->where(function ($query) use ($request) {
+            $query->whereBetween('start_time', [$request->start_time, $request->end_time])
+                  ->orWhereBetween('end_time', [$request->start_time, $request->end_time])
+                 ->orWhereBetween(DB::raw("timestamp('".$request->start_time."')"), [DB::raw('start_time'),DB::raw('end_time')])
+                ->orWhereBetween(DB::raw("timestamp('".$request->end_time."')"), [DB::raw('start_time'),DB::raw('end_time')]);
+        })
+        ->where('status', 'accepted') 
+        ->select('start_time','end_time')
+        ->orderBy('start_time')
+        ->get();
+    if ($requests->count() > 0) {
+        return response()->json([
+            'status' => false,
+            'message' => ' You can`t add a new Request at this time',
+            'data' => $requests
+        ], 400);
+    }
+
+ 
+    $newServiceRequest = ServiceRequest::create([
+        'service_id' => $request->service_id,
+        'customer_id' => Auth::guard('customer_api')->id(),
+        'note' => $request->note,
+        'start_time' => $request->start_time,
+        'end_time' => $request->end_time,
+        'status' => 'pending' 
+    ]);
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Request added successfully',
+        'data' => $newServiceRequest
+    ]);
+}
+
 
     public function accept(Request $request)
     {
@@ -133,9 +149,9 @@ class ServiceRequestController extends Controller
                             ->firstOrFail();
 
 
-        if($serviceRequest->status == 'pending')
+        if($serviceRequest->status == 'accepted')
         {
-            $serviceRequest->status = 'complated';
+            $serviceRequest->status = 'completed';
             $serviceRequest->rate = $request->rate;
             
             $serviceRequest->save();
@@ -149,4 +165,41 @@ class ServiceRequestController extends Controller
             'message' => 'Request must be pending !'
         ],403);
     }
+
+    public function cancel(Request $request){
+        $serviceRequest = ServiceRequest::whereServiceId($request->service_id)
+        ->whereId($request->request_id)
+        ->firstOrFail();
+
+if($serviceRequest->status == 'pending')
+{
+$serviceRequest->status = 'canceled';
+$serviceRequest->save();
+
+return response()->json([
+'message' => 'Request canceled successfully  !'
+]);
+}
+
+return response()->json([
+'message' => 'Request must be pending !'
+],403);
+    }
+    ////////////////////ola
+
+    public function getAcceptedRequestsTimes(Request $request, $service_id)
+{ dd($request);
+    $acceptedRequests = ServiceRequest::where('status', 'accepted')->where('service_id', $service_id)->get();
+   
+    $times = [];
+    foreach ($acceptedRequests as $request) {
+    
+        $times[] = $request->available_times;
+    }
+
+    return response()->json([
+        'service_id' => $service_id,
+    ], 200);
+}
+
 }

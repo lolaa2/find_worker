@@ -18,7 +18,9 @@ class WorkerRequestResource extends JsonResource
     {
        
         return [
+            
             'id' => $this->id,
+            'name'=>$this->company->name,
             'workerId' => $this->worker_id,
             'skils' => $this->skils,
             'requestStatus' => $this->status,

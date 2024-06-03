@@ -29,7 +29,13 @@ class Company extends Authenticatable
     public function city(){
         return $this->belongsTo(City::class);
     }
-   
+    // public function workerRequest(){
+    //     return $this->belongsTo(WorkerRequest::class);
+    // }
+    public function workerRequest()
+    {
+        return $this->hasMany(WorkerRequest::class);
+    }
     /**
      * The attributes that should be cast.
      *

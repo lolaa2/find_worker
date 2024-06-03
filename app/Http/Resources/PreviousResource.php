@@ -16,7 +16,7 @@ class PreviousResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user_name' => $this->users->name,
+          //  'user_name' => $this->users->name,
             'describtion' => $this->description,
             'title' => $this->title,
             'images' => ImagesResource::collection($this->images)

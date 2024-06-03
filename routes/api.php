@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\ServicesCompanyController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\LoginController;
@@ -30,10 +30,10 @@ Route::prefix('/profile')
 });
 
 Route::prefix('/previous')->group((function(){
-    Route::post('/',[PreviousController::class,'addPrevious'])->middleware('auth:sanctum');
-    Route::get('/{id?}',[PreviousController::class,'getUserPrevious'])->middleware('auth:sanctum');
-    Route::post('/{previousId}',[PreviousController::class,'updatePrevious'])->middleware('auth:sanctum');
-    Route::delete('/{previousId}',[PreviousController::class,'deleteService'])->middleware('auth:sanctum');
+    Route::post('/add',[PreviousController::class,'addPrevious'])->middleware('auth:sanctum');
+    Route::get('/show{id?}',[PreviousController::class,'getUserPrevious'])->middleware('auth:sanctum');
+    Route::post('/update{previousId}',[PreviousController::class,'updatePrevious'])->middleware('auth:sanctum');
+    Route::delete('/delete{previousId}',[PreviousController::class,'deletePrevious'])->middleware('auth:sanctum');
 
 }));
 
@@ -57,9 +57,29 @@ Route::prefix('/services')
     Route::get('worker/requests',[ServiceRequestController::class,'getWorkerRequests'])->middleware('auth:worker_api');
     Route::get('company/requests',[ServiceRequestController::class,'getCompanyRequests'])->middleware('auth:company_api');
     Route::post('worker/requests/accept',[ServiceRequestController::class,'accept'])->middleware('auth:worker_api');
-    Route::get('customer/requests/complete',[ServiceRequestController::class,'complete'])->middleware('auth:customer_api');
+    Route::post('customer/requests/complete',[ServiceRequestController::class,'complete'])->middleware('auth:customer_api');
+
+
+    Route::post('worker/requests/cancel',[ServiceRequestController::class,'cancel'])->middleware('auth:worker_api');
+    Route::get('customer/requests/cancel',[ServiceRequestController::class,'cancel'])->middleware('auth:customer_api');
+
+
+    Route::get('/company/show',[ServicesCompanyController::class,'getCompanyServices'])->middleware('auth:sanctum');
+
+
+    Route::post('/company/store',[ServicesCompanyController::class,'storeCompanyService'])->middleware('auth:sanctum');
+    Route::delete('/company/delete{serviceId}',[ServicesCompanyController::class,'deleteCompanyService'])->middleware('auth:sanctum');
+    Route::post('/company/update{service_id}', [ServicesCompanyController::class, 'updateCompanyService'])->middleware('auth:sanctum');
+
+    Route::Post('/worker/request/add',[WorkerRequestsController::class,'storeWorkerRequest'])->middleware('auth:worker_api');
+    Route::get('/company/request/show',[WorkerRequestsController::class,'fetchCompanyRequests'])->middleware('auth:company_api');
+    Route::get('/worker/request/show',[WorkerRequestsController::class,'fetchWorkerRequests'])->middleware('auth:worker_api');
+    Route::post('company/requests/accept',[WorkerRequestsController::class,'accept'])->middleware('auth:sanctum');
+    Route::post('company/requests/cancel',[WorkerRequestsController::class,'cancel'])->middleware('auth:company_api');
+    Route::post('worker/requests/cancel',[WorkerRequestsController::class,'cancel'])->middleware('auth:worker_api');
+    Route::post('company/requests/time/{service_id}',[ServiceRequestController::class,'getAcceptedRequestsTimes'])->middleware('auth:sanctum');
+
+
 
     Route::delete('/delete/images/{imageId}',[ServicesController::class,'deleteImage'])->middleware('auth:sanctum');
-
-
 });

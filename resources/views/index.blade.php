@@ -569,9 +569,9 @@
   new Chart(ctx2, {
     type: "line",
     data: {
-      labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+      labels: {!! json_encode(array_keys($customersStat)) !!},
       datasets: [{
-        label: "Mobile apps",
+        label: "Customers",
         tension: 0,
         borderWidth: 0,
         pointRadius: 5,
@@ -582,7 +582,7 @@
         borderWidth: 4,
         backgroundColor: "transparent",
         fill: true,
-        data: [50, 40, 300, 320, 500, 350, 200, 230, 500],
+        data: {!! json_encode(array_values($customersStat)) !!},
         maxBarThickness: 6
 
       }],

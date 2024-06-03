@@ -30,8 +30,9 @@ class ServicesController extends Controller
         $query->where('category_id', $request->category_id);
       })
       ->latest()
+      ->withAvg('requests' , 'rate')
       ->paginate(perPage: $request->per_page ?? 5);
-
+    
     $services_res = ServicesResource::collection($services);
     return response()->json([
       'lastPage' => $services->lastPage(),
@@ -156,7 +157,7 @@ class ServicesController extends Controller
 
       $service->update([
          'description' => $request->description,
-        'name' => $request->title, 'price' => $request->price, 'category_id' => $request->category_id, 'city' => $request->city_id
+        'name' => $request->title, 'price' => $request->price, 'category_id' => $request->category_id, 'city_id' => $request->city_id
       ]);
       return response()->json([
         'status' => true,
