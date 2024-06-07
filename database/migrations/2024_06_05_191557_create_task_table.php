@@ -11,17 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('worker_requests', function (Blueprint $table) {
+        Schema::create('task', function (Blueprint $table) {
             $table->id();
-            $table->enum('status',['pending','accepted','rejected','completed'])->default('pending');
-            $table->string('note');
-            $table->string('worker_name');
-            $table->string('company_name');
+            $table->String('name');
+            $table->string('description');
+            $table->enum('status',['pending','accepted','completed'])->default('pending');
             $table->foreignId('worker_id')->constrained('users');
-            $table->foreignId('company_id')->constrained('companies');
+            $table->foreignId('service_id')->constrained('services');
+            $table->foreignId('worker_request_id')->constrained('worker_requests');
             $table->timestamp('start_time')->nullable();
             $table->timestamp('end_time')->nullable();
-            $table->string('skils');
             $table->timestamps();
         });
     }
@@ -31,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('worker_requests');
+        Schema::dropIfExists('task');
     }
 };

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\SchedulingRequestResource;
 use App\Http\Resources\Api\ServiceRequestResource;
+use App\Models\Service;
 use App\Models\ServiceRequest;
 use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Http\Request;
@@ -200,6 +202,28 @@ return response()->json([
     return response()->json([
         'service_id' => $service_id,
     ], 200);
-}
+}//ola
+    public function schedulingRequest(Request $request)
+    {
+       $worker=Auth::guard('worker_api') ;
+        $filteredRequests = ServiceRequest::join('services', 'services_requests.service_id', 'services.id')
+            ->where('status', 'accepted')
+            ->select('services_requests.start_time', 'services_requests.end_time', 'services.name','services_requests.*')
+             ->orderBy('start_time')
+              ->paginate(10);
+
+
+        $servic_req = SchedulingRequestResource::collection($filteredRequests);
+
+        return response()->json([
+            'data' => $servic_req,
+        ]);
+    }
+    
+
+    
 
 }
+
+
+

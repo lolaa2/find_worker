@@ -62,4 +62,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(WorkerRequest::class);
     }
+    // public function employees()
+    // {
+    //     return $this->morphMany(Employee::class,'workeras');
+    // } 
+    public function companies(){
+        return $this->belongsToMany(related:'Company',table:'company_user');
+    }
+
 }

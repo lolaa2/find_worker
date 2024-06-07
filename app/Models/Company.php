@@ -36,6 +36,16 @@ class Company extends Authenticatable
     {
         return $this->hasMany(WorkerRequest::class);
     }
+    // public function employees()
+    // {
+    //     return $this->morphMany(Employee::class,'workeras');
+    // }
+    public function users(){
+        return $this->belongsToMany(related:'Users',table:'company_user');
+    }
+    public function task(){
+        return $this->belongsTo(ServiceRequest::class);
+    }
     /**
      * The attributes that should be cast.
      *
