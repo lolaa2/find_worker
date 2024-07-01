@@ -14,13 +14,23 @@ class Service extends Model
         'price',
         'category_id',
         'city_id',
-        'user_id',
+        'serviceable_type',
+        'serviceable_id',
+        
         
     ];
 
-    public function user(){
-        return $this->belongsTo(User::class);
+    public function serviceable()
+    {
+        return $this->morphTo('serviceable');
     }
+
+
+    // public function servicRequests()
+    // {
+    //     return $this->hasMany(ServiceRequest::class);
+    // }
+    
     public function city(){
         return $this->belongsTo(City::class);
     }
@@ -33,6 +43,6 @@ class Service extends Model
     }
 
     public function requests(){
-        return $this->hasMany(ServiceRequest::class);
+        return $this->hasMany(ServiceRequest::class,'serviceable_id');
     }
 }

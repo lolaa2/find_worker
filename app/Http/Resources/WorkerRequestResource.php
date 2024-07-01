@@ -21,14 +21,11 @@ class WorkerRequestResource extends JsonResource
             
             'id' => $this->id,
             'name'=>$this->company->name,
+            'workerName' => $this->user_name,
             'workerId' => $this->worker_id,
             'skils' => $this->skils,
-            'requestStatus' => $this->status,
-            'createdAt' => Carbon::parse($this->created_at)->toDateTimeString(),
-            'updatedAt' => Carbon::parse($this->updated_at)->toDateTimeString(),
-            'note' => $this->note,
-            'worker' => new AuthenticateableContactResource($this->whenLoaded('worker'))
-              
+            'status' => $this->status,
+             
 
         ];
     }

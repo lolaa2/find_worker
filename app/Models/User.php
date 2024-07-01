@@ -49,7 +49,7 @@ class User extends Authenticatable
 
     public function services()
     {
-        return $this->hasMany(Service::class);
+        return $this->morphMany(Service::class,'serviceable');
     }
     public function previous()
     {

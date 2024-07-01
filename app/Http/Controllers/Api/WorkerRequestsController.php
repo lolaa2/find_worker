@@ -36,14 +36,11 @@ class WorkerRequestsController extends Controller
 
     public function storeWorkerRequest(Request $request)
     {
-$worker= Auth::guard('worker_api')->user();
+        $worker= Auth::guard('worker_api')->user();
         $validator = Validator::make($request->all(), [
             'note' => ['required', 'string'],
             'company_id' => ['required', 'integer'],
             'skils'=>['required', 'string'],
-            'worker_name'=>['required', 'string','exists:users,name'],
-            'company_name'=>['required', 'string','exists:companies,name'],
-
         ]);
 
 
@@ -57,12 +54,9 @@ $worker= Auth::guard('worker_api')->user();
 
         $workerRequest = WorkerRequest::create([
             'company_id' => $request->company_id,
-            'company_name' => $request->company_name,
-            'worker_name' =>$worker->name,
             'worker_id' => Auth::guard('worker_api')->id(),
             'note' => $request->note,
             'skils'=>$request->skils
-          
         ]);
 
         return response()->json([
@@ -73,35 +67,35 @@ $worker= Auth::guard('worker_api')->user();
     }
 
 
-    public function accept(Request $request)
-    {
-        $workerRequest = WorkerRequest::where('worker_id', $request->worker_id)
-        ->where('id', $request->request_id)
-        ->firstOrFail();
-        if($workerRequest->status === 'pending')
-        {
-            $workerRequest->status = 'accepted';
-            $workerRequest->save();
+    // public function accept(Request $request)
+    // {
+    //     $workerRequest = WorkerRequest::where('worker_id', $request->worker_id)
+    //     ->where('id', $request->request_id)
+    //     ->firstOrFail();
+    //     if($workerRequest->status === 'pending')
+    //     {
+    //         $workerRequest->status = 'accepted';
+    //         $workerRequest->save();
 
-            return response()->json([
-                'message' => 'Request accepted successfully  !'
-            ]);
-        }
+    //         return response()->json([
+    //             'message' => 'Request accepted successfully  !'
+    //         ]);
+    //     }
 
-        return response()->json([
-            'message' => 'Request must be pending !'
-        ],403);
-    }
+    //     return response()->json([
+    //         'message' => 'Request must be pending !'
+    //     ],403);
+    // }
 
     
     public function cancel(Request $request){
-   $workerRequest = WorkerRequest::whereWorkerId($request->worker_id)
-                            ->whereId($request->request_id)
+   $workerRequest = WorkerRequest::where('worker_id', $request->worker_id)
+   ->where('id', $request->request_id)
                             ->firstOrFail();
 
 if($workerRequest->status == 'pending')
 {
-$workerRequest->status = 'rejected';
+$workerRequest->status = 'canceled';
 $workerRequest->save();
 
 return response()->json([
@@ -113,6 +107,8 @@ return response()->json([
 'message' => 'Request must be pending !'
 ],403);
     }
+
+
     public function fetchWorkerRequests(Request $request)
     {
         $worker = Auth::guard('worker_api')->user();
@@ -131,24 +127,10 @@ return response()->json([
     }
 
 
-    // public function addWorker(Request $request)
-    // {
-    //     $worker = Auth::guard('worker_api')->user();
-    //     $status = Request::where('worker_id', $worker->status);
 
-    //     if ($status === 'accepted') {
-    //         $workerinfor = User::where('worker_id', $worker)->first();
-    //         return response()->json($workerinfor, 200);
-    //     } else {
-    //         return response()->json(['message' => 'Request is not accepted'], 404);
-    //     }
-    // }
     public function acceptRequest(Request $request)
 {  $company = Auth::guard('company_api')->user();
-    $workerRequest = WorkerRequest::where('worker_id', $request->worker_id)
-    ->where('worker_name', $request->worker_name)
-        ->where('id', $request->request_id)
-        ->first();
+    $workerRequest = WorkerRequest::findOrFail($request->request_id);
 
 
     if (!$company) {
@@ -158,38 +140,29 @@ return response()->json([
         ], 404);
     }
 
-    if (!$workerRequest) {
+    if (!$workerRequest->status=='accepted') {
         return response()->json([
             'status' => false,
-            'message' => 'Request Not Found ',
+            'message' => 'Must Be Accepted',
         ], 404);
-        if (!$workerRequest->status=='accepted') {
-            return response()->json([
-                'status' => false,
-                'message' => 'Must Be Accepted',
-            ], 404);
-        }
     }
 
-    $employee = Employee::create([
-        "company_id" => $company->id,
-        "company_name" => $company->name,
-        "worker_name" => $request->worker_name,
-        "worker_id" => $request->worker_id,
-        "status" => $request->status,
+    $workerRequest->update([
+        'status' => 'accepted'
     ]);
+
+
     return response()->json([
         'message' => 'Employee created successfully',
-        'data' => $employee
     ]);
 }
 public function fetchCompanyEmployee(Request $request)
 {
     $company = Auth::guard('company_api')->user();
-    $requests = WorkerRequest::join('users', 'worker_requests.worker_id','users.id')
-        ->join('company_employee', 'worker_requests.worker_id', 'company_employee.worker_id')
+   $requests = WorkerRequest::join('users', 'worker_requests.worker_id','users.id')
         ->where('worker_requests.company_id', $company->id)
-        ->select('worker_requests.*', 'users.name')
+        ->where('worker_requests.status','accepted')
+        ->select('worker_requests.*', 'users.name as user_name')
         ->paginate(5);
     $worker_req = WorkerRequestResource::collection($requests);
     return response()->json([
@@ -198,16 +171,7 @@ public function fetchCompanyEmployee(Request $request)
         'data' => $worker_req,
     ]);
 }
-
-
-
-
-
-
-
-
-
-
+ 
 
 
 public function storeTask(Request $request)
@@ -215,7 +179,7 @@ public function storeTask(Request $request)
     $validator = Validator::make($request->all(), [
         'name' => ['required', 'string'],
         'description'=> ['required', 'string'],
-        'service_id' => ['required', 'integer'],
+        'serviceable_id' => ['required', 'integer'],
         'start_time' => ['required', 'date_format:Y-m-d H:i:s'],
         'end_time' => ['required', 'date_format:Y-m-d H:i:s'],
     ]);
@@ -228,7 +192,7 @@ public function storeTask(Request $request)
         ], 422);
     }
 
-    $requests = Task::where('service_id', $request->service_id)
+    $requests = Task::where('serviceable_id', $request->serviceable_id)
     ->where('worker_id', $request->worker_id)
     ->where('worker_request_id', $request->worker_request_id)
     ->where(function ($query) use ($request) {
@@ -251,7 +215,7 @@ public function storeTask(Request $request)
 
  
     $newTask = Task::create([
-        'service_id' => $request->service_id,
+        'serviceable_id' => $request->serviceable_id,
       //  'company_id' => Auth::guard('company_api')->id(),
         'name' => $request->name,
         'description'=> $request->description,
@@ -274,10 +238,15 @@ public function storeTask(Request $request)
 public function getWorkerTaskes(Request $request)
     {
         $worker = Auth::guard('worker_api')->user();
-        $requests = Task::join('services', 'task.service_id', 'services.id')
+
+        if ($worker instanceof User) {
+            $userType = $worker; 
+        }  
+
+        $requests = Task::join('services','task.serviceable_id', 'services.serviceable_id')
             ->with('company')
-            ->where('services.user_id', $worker->id)
-            ->when($request->service_id, fn ($query) => $query->where('task.service_id', $request->service_id))
+            ->where('services.serviceable_id',$userType->id)
+            ->when($request->service_id, fn ($query) => $query->where('task.serviceable_id', $request->serviceable_id))
             ->select(['task.*', 'services.name'])
             ->paginate(5);
         $services_req = TaskResource::collection($requests);
@@ -287,7 +256,71 @@ public function getWorkerTaskes(Request $request)
             'data' => $services_req,
         ]);
     }
+    public function taskCancle(Request $request){
+        $cancleT = Task::where('worker_id', $request->worker_id)
+        ->where('id', $request->task_id)
+                                 ->firstOrFail();
+     
+     if($cancleT->status == 'pending')
+     {
+     $cancleT->status = 'canceled';
+     $cancleT->save();
+     
+     return response()->json([
+     'message' => 'Request canceled successfully  !'
+     ]);
+     }
+     
+     return response()->json([
+     'message' => 'Request must be pending !'
+     ],403);
+         }
 
+
+         public function taskAccept(Request $request){
+            $cancleT = Task::where('worker_id', $request->worker_id)
+            ->where('id', $request->task_id)
+                                     ->firstOrFail();
+         
+         if($cancleT->status == 'pending')
+         {
+         $cancleT->status = 'Accepted';
+         $cancleT->save();
+         
+         return response()->json([
+         'message' => 'Request Accepted Successfully  !'
+         ]);
+         }
+         
+         return response()->json([
+         'message' => 'Request must be pending !'
+         ],403);
+             }
+
+             public function taskComplet(Request $request){
+                $cancleT = Task::where('worker_id', $request->worker_id)
+                ->where('id', $request->task_id)
+                                         ->firstOrFail();
+             
+             if($cancleT->status == 'pending')
+             {
+             $cancleT->status = 'Completed';
+             $cancleT->save();
+             
+             return response()->json([
+             'message' => 'Request Completed Successfully  !'
+             ]);
+             }
+             
+             return response()->json([
+             'message' => 'Request must be pending !'
+             ],403);
+                 }
+    
+
+
+    }
+  
 
 
 
@@ -297,7 +330,7 @@ public function getWorkerTaskes(Request $request)
 
 
     
-}
+
 
 
 

@@ -16,4 +16,9 @@ class ServiceRequest extends Model
     {
         return $this->belongsTo(Customer::class);
     }
+    
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
+    }
 }

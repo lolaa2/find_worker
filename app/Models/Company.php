@@ -46,6 +46,11 @@ class Company extends Authenticatable
     public function task(){
         return $this->belongsTo(ServiceRequest::class);
     }
+    
+    public function services()
+    {
+        return $this->morphMany(Service::class , 'serviceable');
+    }
     /**
      * The attributes that should be cast.
      *

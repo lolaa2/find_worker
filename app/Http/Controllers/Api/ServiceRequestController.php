@@ -1,6 +1,11 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+use App\Models\User;
+use App\Models\Company;
+use App\Models\Customer;
+use Carbon\Carbon;
+
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\SchedulingRequestResource;
@@ -9,6 +14,7 @@ use App\Models\Service;
 use App\Models\ServiceRequest;
 use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon as SupportCarbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -20,8 +26,15 @@ class ServiceRequestController extends Controller
     public function getCustomerRequests(Request $request)
     {
         $customer = Auth::guard('customer_api')->user();
-        $requests = ServiceRequest::join('services', 'services_requests.service_id', 'services.id')
-            ->where('services_requests.customer_id', $customer->id)
+    
+        if ($customer instanceof Customer) {
+            $userType = $customer; 
+        } else {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $requests = ServiceRequest::join('services', 'services_requests.serviceable_id', 'services.serviceable_id')
+            ->where('services_requests.customer_id', $userType->id)
             ->select(['services_requests.*', 'services.name'])
             ->paginate(5);
         $services_req = ServiceRequestResource::collection($requests);
@@ -34,11 +47,20 @@ class ServiceRequestController extends Controller
 
     public function getWorkerRequests(Request $request)
     {
-        $worker = Auth::guard('worker_api')->user();
-        $requests = ServiceRequest::join('services', 'services_requests.service_id', 'services.id')
+        $user = Auth::guard('worker_api')->user();
+
+        if ($user instanceof Company) {
+            $userType = $user; 
+        } elseif ($user instanceof User) {
+            $userType = $user; 
+        } else {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $requests = ServiceRequest::join('services', 'services_requests.serviceable_id', 'services.id')
             ->with('customer')
-            ->where('services.user_id', $worker->id)
-            ->when($request->service_id, fn ($query) => $query->where('services_requests.service_id', $request->service_id))
+            ->where('services.serviceable_id', $userType->id)
+            ->when($request->serviceable_id, fn ($query) => $query->where('services_requests.serviceable_id', $request->serviceable_id))
             ->select(['services_requests.*', 'services.name'])
             ->paginate(5);
         $services_req = ServiceRequestResource::collection($requests);
@@ -51,11 +73,11 @@ class ServiceRequestController extends Controller
     public function getCompanyRequests(Request $requests)
     {
         $company = Auth::guard('company_api')->user();
-        $requests = ServiceRequest::join('services', 'services_requests.service_id', 'services.id')
+        $requests = ServiceRequest::join('services', 'services_requests.serviceable_id', 'services.serviceable_id')
             ->with('customer')
             ->where('services.user_id', $company->id)
             ->when($requests->service_id, fn ($query) => $query
-                ->where('services_requests.service_id', $requests->service_id))
+                ->where('services_requests.serviceable_id', $requests->serviceable_id))
             ->select(['services_requests.*', 'services.name'])
             ->paginate(5);
         $services_req = ServiceRequestResource::collection($requests);
@@ -70,7 +92,7 @@ public function storeRequest(Request $request)
 {
     $validator = Validator::make($request->all(), [
         'note' => ['required', 'string'],
-        'service_id' => ['required', 'integer'],
+        'serviceable_id' => ['required', 'integer'],
         'start_time' => ['required', 'date_format:Y-m-d H:i:s'],
         'end_time' => ['required', 'date_format:Y-m-d H:i:s'],
     ]);
@@ -83,7 +105,7 @@ public function storeRequest(Request $request)
         ], 422);
     }
 
-    $requests = ServiceRequest::where('service_id', $request->service_id)
+    $requests = ServiceRequest::where('serviceable_id', $request->serviceable_id)
         ->where(function ($query) use ($request) {
             $query->whereBetween('start_time', [$request->start_time, $request->end_time])
                   ->orWhereBetween('end_time', [$request->start_time, $request->end_time])
@@ -104,7 +126,7 @@ public function storeRequest(Request $request)
 
  
     $newServiceRequest = ServiceRequest::create([
-        'service_id' => $request->service_id,
+        'serviceable_id' => $request->serviceable_id,
         'customer_id' => Auth::guard('customer_api')->id(),
         'note' => $request->note,
         'start_time' => $request->start_time,
@@ -122,7 +144,7 @@ public function storeRequest(Request $request)
 
     public function accept(Request $request)
     {
-        $serviceRequest = ServiceRequest::whereServiceId($request->service_id)
+        $serviceRequest = ServiceRequest::whereServiceableId($request->serviceable_id)
                             ->whereId($request->request_id)
                             ->firstOrFail();
 
@@ -146,7 +168,7 @@ public function storeRequest(Request $request)
         $request->validate([
             'rate' => ['required' , 'integer' , 'min:1' , 'max:5']
         ]);
-        $serviceRequest = ServiceRequest::whereServiceId($request->service_id)
+        $serviceRequest = ServiceRequest::whereServiceableId($request->serviceable_id)
                             ->whereId($request->request_id)
                             ->firstOrFail();
 
@@ -169,7 +191,7 @@ public function storeRequest(Request $request)
     }
 
     public function cancel(Request $request){
-        $serviceRequest = ServiceRequest::whereServiceId($request->service_id)
+        $serviceRequest = ServiceRequest::whereServiceableId($request->serviceable_id)
         ->whereId($request->request_id)
         ->firstOrFail();
 
@@ -191,7 +213,8 @@ return response()->json([
 
     public function getAcceptedRequestsTimes(Request $request, $service_id)
 { dd($request);
-    $acceptedRequests = ServiceRequest::where('status', 'accepted')->where('service_id', $service_id)->get();
+    $acceptedRequests = ServiceRequest::where('status', 'accepted')
+    ->where('service_id', $service_id)->get();
    
     $times = [];
     foreach ($acceptedRequests as $request) {
@@ -206,7 +229,7 @@ return response()->json([
     public function schedulingRequest(Request $request)
     {
        $worker=Auth::guard('worker_api') ;
-        $filteredRequests = ServiceRequest::join('services', 'services_requests.service_id', 'services.id')
+        $filteredRequests = ServiceRequest::join('services', 'services_requests.serviceable_id', 'services.serviceable_id')
             ->where('status', 'accepted')
             ->select('services_requests.start_time', 'services_requests.end_time', 'services.name','services_requests.*')
              ->orderBy('start_time')
@@ -219,11 +242,138 @@ return response()->json([
             'data' => $servic_req,
         ]);
     }
-    
+
+
+
+    // public function freeTime(){
+    // $availableTime=ServiceRequest::join('services','services_requests.serviceable_id','services.serviceable_id')
+    // ->whereNotIn('status', ['accepted'])
+    // ->select('services_requests.start_time','services_requests.*')
+    //          ->orderBy('start_time')
+    //           ->paginate(10);
+
+    //           return response()->json([
+    //             'data' => $availableTime,
+    //         ]);
+
+
+
+
+
+
+
+    // لحساب وظيفة تعيين الاوقات المتاحة بناءً على جدول المواعيد للعامل، يمكنك استخدام الكود التالي في Laravel
 
     
+    // function calculateAvailableTimes($worker_id, $date) {
+    //     $workStart = new SupportCarbon("08:00:00");
+    //     $workEnd = new SupportCarbon("17:00:00");
+    
+    //     $serviceRequests = ServiceRequest::where('worker_id', $worker_id)
+    //         ->where('status', ['accepted'])
+    //         ->orderBy('start_time')
+    //         ->get();
+    
+    //     $availableTimes = [];
+    
+    //     foreach ($serviceRequests as $key => $request) {
+    //         $endTime = new SupportCarbon($request->end_time);
+    
+    //         // Add available time slots between requests
+    //         if ($key == 0) {
+    //             $startTime = new SupportCarbon("08:00:00"); // Start of work
+    //         } else {
+    //             $prevEndTime = new SupportCarbon($serviceRequests[$key - 1]->end_time);
+    //             $startTime = $prevEndTime;
+    //         }
+    
+    //         $timeDiff = $startTime->diff($endTime);
+    
+    //         if ($timeDiff->h * 60 + $timeDiff->i >= 60) { // Check if available time slot is at least 1 hour
+    //             $availableTimes[] = [
+    //                 'start' => $startTime->format('H:i'),
+    //                 'end' => $endTime->format('H:i')
+    //             ];
+    //         }
+    //     }
+    
+    //     // Add available time slots after last request
+    //     $lastEndTime = new SupportCarbon($serviceRequests->last()->end_time);
+    //     $lastStartTime = $lastEndTime;
+    
+    //     $timeDiff = $lastStartTime->diff($workEnd);
+    
+    //     if ($timeDiff->h * 60 + $timeDiff->i >= 60) { // Check if available time slot is at least 1 hour
+    //         $availableTimes[] = [
+    //             'start' => $lastStartTime->format('H:i'),
+    //             'end' => $workEnd->format('H:i')
+    //         ];
+    //     }
+    
+    //     return $availableTimes;
 
+    
+    // // هذا الكود يحسب الأوقات المتاحة بين المواعيد للعامل ويعود بجدول يحتوي على الاوقات المتاحة بين المواعيد وبعد آخر موعد، مع الحفاظ على المدة الزمنية المتاحة لكل فترة. يمكنك مشاهدة الاوقات المتاحة وعرضها للمستخدم بشكل مطلوب.
+    
+    // }
+
+
+    function calculateAvailableTimes($serviceable_id) {
+        $workStart = Carbon::parse("08:00:00");
+        $workEnd = Carbon::parse("17:00:00");
+    
+        $serviceRequests = ServiceRequest::join('services', 'services_requests.serviceable_id', 'services.serviceable_id')
+    //   -> where('serviceable_id', $serviceable_id)
+            ->where('status', 'accepted')
+            ->select('services_requests.start_time', 'services_requests.end_time', 'services.name','services_requests.*') // تأكد من أن القيمة 'accepted' صحيحة
+            ->orderBy('start_time')
+            ->get();
+    
+        $availableTimes = [];
+    
+        foreach ($serviceRequests as $key => $request) {      
+              $endTime = Carbon::parse($request->end_time);
+    
+            // Add available time slots between requests
+            if ($key == 0) {
+                $startTime = Carbon::parse("08:00:00"); // Start of work
+            } else {
+                $prevEndTime = Carbon::parse($serviceRequests[$key - 1]->$request->end_time);
+                $startTime = $prevEndTime;
+            }
+    
+            $timeDiff = $startTime->diffInSeconds($endTime);
+    
+            if ($timeDiff >= 3600) { // Check if available time slot is at least 1 hour
+                $availableTimes[] = [
+                    'start' => $startTime->format('H:i'),
+                    'end' => $endTime->format('H:i')
+                ];
+            }
+        }
+    
+        // Add available time slots after last request
+        $lastEndTime = Carbon::parse($serviceRequests->last()->end_time);
+        $lastStartTime = $lastEndTime;
+    
+        $timeDiff = $lastStartTime->diffInSeconds($workEnd);
+    
+        if ($timeDiff >= 3600) { // Check if available time slot is at least 1 hour
+            $availableTimes[] = [
+                'start' => $lastStartTime->format('H:i'),
+                'end' => $workEnd->format('H:i')
+            ];
+        }
+
+    
+        
+              return response()->json([
+                'data' => $availableTimes,
+            ]);
+
+    }
+    
+    
 }
-
 
 

@@ -13,14 +13,10 @@ return new class extends Migration
     {
         Schema::create('worker_requests', function (Blueprint $table) {
             $table->id();
-            $table->enum('status',['pending','accepted','rejected','completed'])->default('pending');
+            $table->enum('status',['pending','accepted','rejected','completed','canceled'])->default('pending');
             $table->string('note');
-            $table->string('worker_name');
-            $table->string('company_name');
             $table->foreignId('worker_id')->constrained('users');
             $table->foreignId('company_id')->constrained('companies');
-            $table->timestamp('start_time')->nullable();
-            $table->timestamp('end_time')->nullable();
             $table->string('skils');
             $table->timestamps();
         });

@@ -3,19 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ServicesResource;
+use App\Models\Company;
 use App\Models\Image;
 use Illuminate\Http\Request;
 
 use App\Models\Service;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\Avg;
 class ServicesController extends Controller
 {
   public function services(Request $request)
   {
 
-    $services = Service::with(['user', 'city', 'category', 'images'])
+    $services = Service::with(['serviceable', 'city', 'category', 'images'])
       ->when($request->city_id, function ($query) use ($request) {
         $query->where('city_id', $request->city_id);
       })
@@ -29,10 +32,15 @@ class ServicesController extends Controller
       ->when($request->category_id, function ($query) use ($request) {
         $query->where('category_id', $request->category_id);
       })
+      ->when($request->user_id , function ($query) use ($request) {
+        $query->where('serviceable_type', User::class)->where('serviceable_id',$request->user_id);
+      })
+      ->when($request->company_id , function ($query) use ($request) {
+        $query->where('serviceable_type', Company::class)->where('serviceable_id',$request->company_id);
+      })
       ->latest()
-      ->withAvg('requests' , 'rate')
+      ->withAvg('requests','rate')
       ->paginate(perPage: $request->per_page ?? 5);
-    
     $services_res = ServicesResource::collection($services);
     return response()->json([
       'lastPage' => $services->lastPage(),
@@ -40,22 +48,40 @@ class ServicesController extends Controller
       'data' => $services_res,
     ]);
   }
-  public function getUserServices(Request $service)
+  public function getUserServices(Request $request)
   {
+      
+    $userType = User::class;
 
-    $user = Auth::id();
-    $services = Service::where('user_id', $user)->with(['user', 'city', 'category', 'images'])->get();
+    if(Auth::guard('company_api')->check())
+    {
+      $userType =  Company::class;
+    }
+
+
+    $services = Service::where('serviceable_type', $userType)->with(['serviceable', 'city', 'category', 'images'])->get();
+
     $services_res = ServicesResource::collection($services);
+    
     return response()->json(['data' => $services_res]);
+   
   }
   public function deleteService(Request $request, $serviceId)
   {
 
-    $user = Auth::id();
+   
+    $userType = User::class;
+
+    if(Auth::guard('company_api')->check())
+    {
+      $userType =  Company::class;
+    }
+
+
 
     // التحقق مما إذا كان المستخدم يمتلك الخدمة قبل حذفها
     $service = Service::where('id', $serviceId)
-      ->where('user_id', $user)
+      ->where('serviceable_type', $userType)
       ->first();
 
     if (!$service) {
@@ -80,9 +106,17 @@ class ServicesController extends Controller
   public function updateService(Request $request, $serviceId)
   { {
 
-      $user = Auth::id();
-      $service = Service::where('id', $serviceId)
-        ->where('user_id', $user)
+       
+    $userType = User::class;
+
+    if(Auth::guard('company_api')->check())
+    {
+      $userType =  Company::class;
+    }
+
+
+      $service = Service::where('serviceable_id', $serviceId)
+        ->where('serviceable_type', $userType)
         ->first();
 
       if (!$service) {
@@ -154,6 +188,7 @@ class ServicesController extends Controller
         }
       }
 
+   
 
       $service->update([
          'description' => $request->description,
@@ -205,6 +240,12 @@ class ServicesController extends Controller
       }
     }
 
+    $userType = User::class;
+
+    if(Auth::guard('company_api')->check())
+    {
+      $userType =  Company::class;
+    }
 
     $service = Service::create([
       "name" => $request->name,
@@ -212,7 +253,8 @@ class ServicesController extends Controller
       "category_id" => $request->category_id,
       "city_id" => $request->city_id,
       "price" => $request->price,
-      "user_id" => Auth::id()
+      "serviceable_id" => Auth::id(),
+      "serviceable_type" => $userType,
     ]);
 
     foreach ($paths as $image_path) {
@@ -230,10 +272,18 @@ class ServicesController extends Controller
 
   public function deleteImage($imageId)
   {
-    $user = Auth::id();
+    
+    $userType = User::class;
+
+    if(Auth::guard('company_api')->check())
+    {
+      $userType =  Company::class;
+    }
+
+
     $image = Image::where('id', $imageId)
-      ->whereHasMorph('imageable', Service::class, function ($query) use ($user) {
-        $query->where('user_id', $user);
+      ->whereHasMorph('imageable', Service::class, function ($query) use ($userType) {
+        $query->where('serviceable_type', $userType);
       })->first();
 
     if ($image) {

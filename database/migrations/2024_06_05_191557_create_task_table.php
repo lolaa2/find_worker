@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->String('name');
             $table->string('description');
-            $table->enum('status',['pending','accepted','completed'])->default('pending');
+            $table->enum('status',['pending','accepted','completed','canceled'])->default('pending');
             $table->foreignId('worker_id')->constrained('users');
-            $table->foreignId('service_id')->constrained('services');
+            $table->foreignId('serviceable_id')->constrained('services');
             $table->foreignId('worker_request_id')->constrained('worker_requests');
             $table->timestamp('start_time')->nullable();
             $table->timestamp('end_time')->nullable();

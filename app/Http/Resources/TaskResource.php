@@ -20,7 +20,7 @@ class TaskResource extends JsonResource
             'description'=>$this->description,
             'status'=>$this->status,
             'worker_id'=>$this->worker_id,
-            'sercice_id'=>$this->sercice_id,
+            'serviceable_id'=>$this->serviceable_id,
             'worker_request_id'=>$this->worker_request_id,
             'startTime' => Carbon::parse($this->start_time)->toDateTimeString(),
             'endTime' => Carbon::parse($this->end_time)->toDateTimeString(),

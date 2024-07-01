@@ -19,7 +19,7 @@ class Task extends Model
     }
     
 public function worker() {
-    return $this->belongsTo(User::class, 'worker_id'); 
+    return $this->belongsTo(User::class,'worker_id'); 
 }
 public function company():BelongsTo
 {
