@@ -130,6 +130,7 @@ class RegisterController extends Controller
             'password' => ['required', 'string'],
             'confirm_password' => ['required', 'string', 'same:password'],
             'city_id' => ['required', 'numeric', 'exists:cities,id'],
+            'category_id' => ['required', 'numeric', 'exists:categories,id'],
 
         ]);
 
@@ -148,6 +149,7 @@ class RegisterController extends Controller
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'city_id' => $request->city_id,
+            'category_id' => $request->category_id,
             'name' => $request->name
         ]);
 

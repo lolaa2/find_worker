@@ -19,9 +19,12 @@ class CompanyResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'cityName' =>$this->city->name,
+            'categoryName'=>$this->category->name,
             // 'rate' => (float) $this->requests_avg_rate,
             'phone' => $this->phone,
-            'publishDate' => $this->created_at->diffForHumans()
+           'CreatAt' => $this->created_at->diffForHumans(),
+           'services'=>$this->services,
+           
         ];
     }
 }

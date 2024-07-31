@@ -20,11 +20,14 @@ class WorkerRequestResource extends JsonResource
         return [
             
             'id' => $this->id,
-            'name'=>$this->company->name,
+            'companyName'=>$this->company->name,
             'workerName' => $this->user_name,
+            'workerEmail' => $this->user_email,
+            'workerPhone' => $this->user_phone,
             'workerId' => $this->worker_id,
             'skils' => $this->skils,
             'status' => $this->status,
+            'note'=>$this->note,
              
 
         ];

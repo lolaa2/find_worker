@@ -28,7 +28,9 @@ class ServicesController extends Controller
       ->when($request->max_price, function ($query) use ($request) {
         $query->where('price', "<=", $request->max_price);
       })
-
+      ->when($request->name, function ($query) use ($request) {
+        $query->where('name', $request->name);
+      })
       ->when($request->category_id, function ($query) use ($request) {
         $query->where('category_id', $request->category_id);
       })
@@ -40,7 +42,7 @@ class ServicesController extends Controller
       })
       ->latest()
       ->withAvg('requests','rate')
-      ->paginate(perPage: $request->per_page ?? 5);
+      ->paginate(perPage: $request->per_page ?? 8);
     $services_res = ServicesResource::collection($services);
     return response()->json([
       'lastPage' => $services->lastPage(),
@@ -48,18 +50,34 @@ class ServicesController extends Controller
       'data' => $services_res,
     ]);
   }
+  public function servicesFetchById(Request $request){
+    
+    $service = User::whereId($request->id)
+   -> with('services')
+    ->get();
+     
+ 
+    
+    return response()->json([
+        'data' => $service
+    ]);
+}
   public function getUserServices(Request $request)
   {
       
     $userType = User::class;
-
+   $userId = Auth::guard('worker_api')->user();
+   
     if(Auth::guard('company_api')->check())
     {
       $userType =  Company::class;
+      $userId =Auth::guard('company_api')->user();
     }
+//  dd($userId);
 
-
-    $services = Service::where('serviceable_type', $userType)->with(['serviceable', 'city', 'category', 'images'])->get();
+    $services = Service::where('serviceable_type', $userType)
+    ->where('serviceable_id',$userId->id)
+    ->with(['serviceable', 'city', 'category', 'images'])->get();
 
     $services_res = ServicesResource::collection($services);
     
@@ -72,9 +90,11 @@ class ServicesController extends Controller
    
     $userType = User::class;
 
+
     if(Auth::guard('company_api')->check())
     {
       $userType =  Company::class;
+    
     }
 
 
@@ -294,4 +314,5 @@ class ServicesController extends Controller
       return response()->json(['message' => ' No Image found ']);
     }
   }
+  
 }

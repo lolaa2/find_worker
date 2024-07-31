@@ -55,19 +55,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(Previous::class);
     }
-    // public function workerRequest(){
-    //     return $this->belongsTo(workerRequest::class);
-    // }
+
     public function workerRequest()
     {
         return $this->hasMany(WorkerRequest::class);
     }
-    // public function employees()
-    // {
-    //     return $this->morphMany(Employee::class,'workeras');
-    // } 
+
     public function companies(){
         return $this->belongsToMany(related:'Company',table:'company_user');
+    }
+    public function city(){
+        return $this->belongsTo(City::class);
+    }
+    public function work(){
+        return $this->belongsTo(Work::class);
     }
 
 }

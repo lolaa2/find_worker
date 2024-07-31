@@ -21,4 +21,8 @@ class ServiceRequest extends Model
     {
         return $this->belongsTo(Service::class);
     }
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
 }

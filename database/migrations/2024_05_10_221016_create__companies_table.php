@@ -17,7 +17,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone')->unique();
             $table->foreignId('city_id');
-            $table->foreign('city_id')->references("id")->on("cities");    
+            $table->foreign('city_id')->references("id")->on("cities"); 
+            $table->foreignId('category_id');
+            $table->foreign('category_id')->references("id")->on("categories");    
             $table->string('password');
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();

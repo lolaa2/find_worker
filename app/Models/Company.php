@@ -29,17 +29,17 @@ class Company extends Authenticatable
     public function city(){
         return $this->belongsTo(City::class);
     }
-    // public function workerRequest(){
-    //     return $this->belongsTo(WorkerRequest::class);
-    // }
+
+
+    public function category(){
+        return $this->belongsTo(Category::class);
+    }
+ 
     public function workerRequest()
     {
         return $this->hasMany(WorkerRequest::class);
     }
-    // public function employees()
-    // {
-    //     return $this->morphMany(Employee::class,'workeras');
-    // }
+
     public function users(){
         return $this->belongsToMany(related:'Users',table:'company_user');
     }

@@ -40,7 +40,7 @@ class ServicesRequestDataTable extends DataTable
     public function query(ServiceRequest $model): QueryBuilder
     {
         $service = request()->service;
-        return $model->where('service_id',$service->id);
+        return $model->where('serviceable_id',$service->id);
     }
 
     /**

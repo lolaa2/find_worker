@@ -16,13 +16,12 @@ class UserResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'created_at'=> $this->created_at,
-            'updated_at'=>$this->updated_at,
+            'CreatAt' => $this->created_at->diffForHumans(),
             'email'=>$this->email,
             'phone'=>$this->phone,
             'name'=>$this->name,
-            'city_id'=>$this->city_id,
-            'work_id'=>$this->work_id,
+            'cityName'=>$this->city->name,
+            'workName'=>$this->work->name,
 
         ];
     }

@@ -17,6 +17,9 @@ class Task extends Model
     public function workerRequest() {
         return $this->belongsTo(WorkerRequest::class);
     }
+    public function servicesRequests() {
+        return $this->belongsTo(ServiceRequest::class);
+    }
     
 public function worker() {
     return $this->belongsTo(User::class,'worker_id'); 

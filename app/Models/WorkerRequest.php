@@ -10,11 +10,6 @@ class WorkerRequest extends Model
     protected $table='worker_requests';
     protected $guarded=[];
 
-    // public function worker():BelongsTo
-    // {
-    //     return $this->belongsTo(User::class,'worker_id');
-    // }
-    
     public function worker()
     {
         return $this->belongsTo(User::class);

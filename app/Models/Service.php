@@ -25,11 +25,6 @@ class Service extends Model
         return $this->morphTo('serviceable');
     }
 
-
-    // public function servicRequests()
-    // {
-    //     return $this->hasMany(ServiceRequest::class);
-    // }
     
     public function city(){
         return $this->belongsTo(City::class);
